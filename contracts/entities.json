@@ -1,0 +1,19 @@
+{
+  "schema_version": "1",
+  "domain": "食品品牌宣传合规台",
+  "required_fields": [
+    "product_ref",
+    "formula_revision",
+    "material_ref",
+    "channel_code",
+    "rule_ref",
+    "effective_from"
+  ],
+  "time_format": "ISO 8601 with offset",
+  "sample": {
+    "product_ref": "PRODUCT-DEMO",
+    "formula_revision": 3,
+    "material_ref": "CAMPAIGN-A",
+    "channel_code": "social"
+  }
+}
