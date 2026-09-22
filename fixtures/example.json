@@ -1,6 +1,112 @@
 {
-  "product_ref": "PRODUCT-DEMO",
-  "formula_revision": 3,
-  "material_ref": "CAMPAIGN-A",
-  "channel_code": "social"
+  "incident_request": {
+    "title": "喉糖短视频涉嫌药效宣传",
+    "product_ref": "PROD-LOZENGE",
+    "formula_revision": 7,
+    "risk_type": "mistaken_medicinal_claim",
+    "source_system": "risk-hotline",
+    "source_sequence": "RN-20260922-001",
+    "detail_ref": "doc://risk/notice/RN-20260922-001"
+  },
+  "manifest_request": {
+    "assets": [
+      {
+        "client_key": "hero-original",
+        "kind": "original",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+        "consumer_material": true
+      },
+      {
+        "client_key": "dealer-cut",
+        "kind": "derivative",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000002",
+        "derived_from_client_key": "hero-original",
+        "transform_note": "裁剪 15 秒并叠加 药食同源 字样"
+      },
+      {
+        "client_key": "compliant-hero",
+        "kind": "replacement",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000003"
+      }
+    ],
+    "placements": [
+      {
+        "client_key": "shop-detail",
+        "asset_client_key": "hero-original",
+        "channel_code": "direct_store",
+        "locator": "https://shop.example.invalid/p/lozenge"
+      },
+      {
+        "client_key": "dealer-video-77",
+        "asset_client_key": "dealer-cut",
+        "channel_code": "dealer_shortvideo",
+        "account_ref": "DSV-77",
+        "locator": "https://video.example.invalid/v/77"
+      },
+      {
+        "client_key": "mall-screen",
+        "asset_client_key": "hero-original",
+        "channel_code": "offline_screen",
+        "locator": "SCREEN-L4-12"
+      },
+      {
+        "client_key": "talent-post",
+        "asset_client_key": "dealer-cut",
+        "channel_code": "celebrity_team",
+        "account_ref": "TALENT-MAIN",
+        "locator": "https://talent.example.invalid/post/9"
+      }
+    ]
+  },
+  "scope_request": {
+    "default_action": "takedown",
+    "deadline_hours": 24,
+    "actions": {"PL-0001": "replace"},
+    "replacement_map": {"PL-0001": "MAT-0003"}
+  },
+  "release_approval_request": {
+    "decision": "approved",
+    "review_batch_ref": "RB-20260922-03",
+    "basis_note": "独立审核：替代版本已删除全部药效暗示与药材联想，符合食品宣传口径"
+  },
+  "platform_callback_request": {
+    "kind": "platform_callback",
+    "source_system": "shop-platform",
+    "delivery_id": "CB-20260922-0001",
+    "claimed_complete": true,
+    "coverage": [
+      {
+        "placement_ref": "PL-0001",
+        "claimed_state": "replaced",
+        "claimed_replacement_ref": "MAT-0003"
+      }
+    ]
+  },
+  "field_recheck_request": {
+    "kind": "field_recheck",
+    "source_system": "field-app",
+    "summary": "屏幕 L4-12 已切换为品牌季节通用片，原喉糖片不再播放",
+    "attachment_sha256": "00000000000000000000000000000000000000000000000000000000000000aa",
+    "coverage": [
+      {"placement_ref": "PL-0003", "claimed_state": "removed"}
+    ]
+  },
+  "recurrence_observation": {
+    "channel_code": "dealer_shortvideo",
+    "account_ref": "DSV-77",
+    "locator": "https://video.example.invalid/v/77",
+    "asset_sha256": "0000000000000000000000000000000000000000000000000000000000000002",
+    "source": "monitor"
+  },
+  "demo_tokens": {
+    "risk_owner": "tok-risk-1",
+    "legal": "tok-legal-1",
+    "compliance_reviewer": "tok-comp-1",
+    "field_auditor": "tok-audit-1",
+    "executive": "tok-exec-1",
+    "dealer_east": "tok-dealer-east",
+    "dealer_west": "tok-dealer-west",
+    "talent_team": "tok-talent-1",
+    "monitor_system": "tok-system"
+  }
 }

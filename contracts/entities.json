@@ -1,19 +1,65 @@
 {
-  "schema_version": "1",
-  "domain": "食品品牌宣传合规台",
-  "required_fields": [
-    "product_ref",
-    "formula_revision",
-    "material_ref",
-    "channel_code",
-    "rule_ref",
-    "effective_from"
-  ],
-  "time_format": "ISO 8601 with offset",
-  "sample": {
-    "product_ref": "PRODUCT-DEMO",
-    "formula_revision": 3,
-    "material_ref": "CAMPAIGN-A",
-    "channel_code": "social"
-  }
+  "schema_version": "2",
+  "domain": "食品品牌宣传合规台 · 多渠道撤回与替换",
+  "conventions": {
+    "identity": "外部主体一律使用受控引用编号，不保存真实身份信息",
+    "time": "ISO 8601 with offset，存储统一规范为 UTC 毫秒精度 Z 格式",
+    "attachments": "只记录受控引用或 sha256 摘要",
+    "events": "业务事件携带来源系统(source_system)与序列号(source_sequence)，来源对事实负责",
+    "auth": "X-API-Token，角色 risk_owner/legal/compliance/field_auditor/executive/dealer/talent/system"
+  },
+  "entities": {
+    "incident": {
+      "required_fields": ["title", "product_ref", "risk_type", "source_system", "source_sequence", "risk_owner_id"],
+      "optional_fields": ["formula_revision", "detail_ref"],
+      "status": ["open", "monitoring", "closed"],
+      "sensitive_for_roles": {"talent": ["formula_revision"]}
+    },
+    "asset": {
+      "required_fields": ["incident_id", "kind", "sha256"],
+      "kind": ["original", "derivative", "replacement"],
+      "status": ["in_circulation", "withdrawn", "replacement"],
+      "relations": ["derived_from_asset_id"],
+      "sensitive_for_roles": {"talent": ["consumer_material", "transform_note"]}
+    },
+    "placement": {
+      "required_fields": ["incident_id", "asset_id", "channel_id", "locator", "owner_org_type", "owner_org_id"],
+      "status": ["identified", "scoped", "notified", "resolved", "recurred"],
+      "note": "locator 必须可核验（URL/屏幕编号/页面路径）"
+    },
+    "notice": {
+      "required_fields": ["incident_id", "channel_id", "required_action", "issued_at", "due_at"],
+      "status": ["issued", "delivered", "failed", "superseded", "completed"],
+      "note": "按渠道负责人分组发出，唯一编号 N-<incident>-<seq>；复发重发产生新编号"
+    },
+    "evidence": {
+      "required_fields": ["incident_id", "kind", "source_system", "status"],
+      "kind": ["platform_callback", "manual_screenshot", "field_recheck", "contact_record"],
+      "status": ["pending_verification", "verified", "rejected", "duplicate"],
+      "idempotency": "delivery_id 唯一；重复回调返回首条凭证且不推进任何状态"
+    },
+    "escalation": {
+      "type": ["unreachable", "refused", "recurrence", "partial_replace"],
+      "level": [1, 2, 3],
+      "status": ["open", "resolved"]
+    },
+    "release_approval": {
+      "required_fields": ["asset_id", "decision", "reviewer_actor_id", "review_batch_ref", "valid_from"],
+      "decision": ["approved", "rejected", "rescinded"],
+      "note": "替代素材独立审核放行；旧素材撤回不自动产生放行；有效期窗口外不予替换闭环"
+    },
+    "observation": {
+      "required_fields": ["channel_code", "locator", "asset_sha256", "source", "observed_at"],
+      "source": ["monitor", "report", "platform_feed"]
+    }
+  },
+  "state_rules": [
+    "仅核验通过的凭证可把点位置为 resolved",
+    "通知下全部点位 resolved 后通知才 completed",
+    "claimed_complete=true 但漏报点位时拒绝凭证并开 partial_replace 升级",
+    "替换闭环要求替代素材在核验时点处于有效放行窗口",
+    "已 resolved 点位再次观察到内容：回到 recurred 并开 recurrence 升级，事件重新激活",
+    "经销商(dealer)仅可访问本 org 点位；代言团队(talent)额外不可见配方与消费者材料",
+    "事件闭环条件：无未闭环点位且无 open 升级；闭环后进入 monitoring 持续发现复发"
+  ]
 }
